@@ -18,6 +18,7 @@ def start_db()->sqlalchemy.orm.session.Session:
         return recreate_tables(engine)    
     return create_tables(engine)
 
+
 def create_publiser(name:str, pk:int = -1)->Publisher:
     if pk <= 0: return Publisher(name = name)
     else: return Publisher(id = pk, name = name)
@@ -37,6 +38,7 @@ def create_stock(id_shop:int, id_book:int, count:int, pk:int = -1)->Stock:
 def create_sale(price:int, date_sale:str, count:int, id_stock:int, pk:int = -1)->Sale:
     if pk <= 0: return Sale(price = price, date_sale = date_sale, count = count, id_stock = id_stock)
     else: return Sale(id = pk, price = price, date_sale = date_sale, count = count, id_stock = id_stock)
+
 
 def update_database(session:sqlalchemy.orm.session.Session, obj)->bool:
     session.add(obj)
@@ -68,7 +70,22 @@ def upload_database(session:sqlalchemy.orm.session.Session)->bool:
                 obj = create_sale(price=line['fields']['price'], date_sale=line['fields']['date_sale'], count=line['fields']['count'], id_stock=line['fields']['id_stock'], pk=line['pk'])
                 update_database(session=session, obj=obj)
     return True
-    
+
+def query_find_bookname_by_id(session:sqlalchemy.orm.session.Session, id:int)->str:
+    ...
+
+
+def query_find_publisher(session:sqlalchemy.orm.session.Session, filt:str)->Publisher:
+    q = session.query(Publisher).filter(Publisher.id == int(filt))
+    if len(q.all()) == 0:
+        q = session.querry(Publisher).filter(Publisher.name.like('%'+filt+'%'))
+    return q.all()
+    ...
+
+def query_main(session:sqlalchemy.orm.session.Session, id_publisher):
+    q = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale).join(Stock, Sale.id == Stock.id).join(Shop, Stock.id_shop == Shop.id).join(Book, Stock.id_book==Book.id).filter(Book.id_publisher == int(id_publisher))
+    return q.all()
+
 def main():
     try:
         session = start_db()
@@ -80,6 +97,24 @@ def main():
         if upload_database(session):
             print('Success!')
         else: print('Error!')
+    publisher = input('Enter the publisher: ')
+    publisher = query_find_publisher(session, publisher)
+    if len(publisher) == 0:
+        print('There is no publishers!')
+    elif len(publisher) > 1:
+        print('Which one?')
+        for n, publ in enumerate(publisher):
+            print(f'{n+1}.{publ.name}')
+        answ = input()
+        if answ - 1 in range(n):
+            publisher = publisher[answ-1]
+        else: print('Wrong number, restart programm...')
+    else:
+        data = query_main(session=session, id_publisher=publisher[0].id)
+        for line in data:
+            print(f'{line[0]} | {line[1]} | {line[2]} | {line[3]}')
+    ...
+
     # start_db()
 
 
