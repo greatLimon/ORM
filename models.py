@@ -41,7 +41,4 @@ class Sale(Base):
 
 def create_tables(engine:sq.engine)->sessionmaker:
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind = engine)
-    session = Session()
-    print(type(session))
-    return session
+    
