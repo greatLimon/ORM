@@ -76,10 +76,11 @@ def query_find_bookname_by_id(session:sqlalchemy.orm.session.Session, id:int)->s
 
 
 def query_find_publisher(session:sqlalchemy.orm.session.Session, filt:str)->Publisher:
-    q = session.query(Publisher).filter(Publisher.id == int(filt))
-    if len(q.all()) == 0:
-        q = session.querry(Publisher).filter(Publisher.name.like('%'+filt+'%'))
-    return q.all()
+    try:
+        q = session.query(Publisher).filter(Publisher.id == int(filt))
+    except:
+        q = session.query(Publisher).filter(Publisher.name.like('%'+filt+'%'))
+        return q.all()
     ...
 
 def query_main(session:sqlalchemy.orm.session.Session, id_publisher):
