@@ -9,6 +9,9 @@ class Publisher(Base):
     id = sq.Column(sq.Integer, primary_key = True)
     name = sq.Column(sq.String(length=60), unique=True)
 
+    def __str__(self):
+        return f'{self.id}. {self.name}'
+
 class Shop(Base):
     __tablename__ = 'shop'
     id = sq.Column(sq.Integer, primary_key = True)

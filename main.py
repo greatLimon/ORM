@@ -39,7 +39,6 @@ def create_sale(price:int, date_sale:str, count:int, id_stock:int, pk:int = -1)-
     if pk <= 0: return Sale(price = price, date_sale = date_sale, count = count, id_stock = id_stock)
     else: return Sale(id = pk, price = price, date_sale = date_sale, count = count, id_stock = id_stock)
 
-
 def update_database(session:sqlalchemy.orm.session.Session, obj)->bool:
     session.add(obj)
     try:
@@ -71,19 +70,19 @@ def upload_database(session:sqlalchemy.orm.session.Session)->bool:
                 update_database(session=session, obj=obj)
     return True
 
-def query_find_bookname_by_id(session:sqlalchemy.orm.session.Session, id:int)->str:
-    ...
-
-
 def query_find_publisher(session:sqlalchemy.orm.session.Session, filt:str)->Publisher:
     try:
         q = session.query(Publisher).filter(Publisher.id == int(filt))
     except:
         q = session.query(Publisher).filter(Publisher.name.like('%'+filt+'%'))
         return q.all()
-    ...
 
-def query_main(session:sqlalchemy.orm.session.Session, id_publisher):
+def query_print_all_publishers(session:sqlalchemy.orm.session.Session)->None:
+    q = session.query(Publisher)
+    for publ in q:
+        print(publ)
+
+def query_main(session:sqlalchemy.orm.session.Session, id_publisher)->list:
     q = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale).join(Stock, Sale.id == Stock.id).join(Shop, Stock.id_shop == Shop.id).join(Book, Stock.id_book==Book.id).filter(Book.id_publisher == int(id_publisher))
     return q.all()
 
@@ -98,6 +97,7 @@ def main():
         if upload_database(session):
             print('Success!')
         else: print('Error!')
+    query_print_all_publishers(session)
     publisher = input('Enter the publisher: ')
     publisher = query_find_publisher(session, publisher)
     if len(publisher) == 0:
@@ -114,9 +114,6 @@ def main():
         data = query_main(session=session, id_publisher=publisher[0].id)
         for line in data:
             print(f'{line[0]} | {line[1]} | {line[2]} | {line[3]}')
-    ...
-
-    # start_db()
 
 
 if __name__ == '__main__':
