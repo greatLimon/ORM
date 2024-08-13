@@ -39,6 +39,12 @@ class Sale(Base):
     count = sq.Column(sq.Integer, nullable= False)
 # -Tables
 
-def create_tables(engine:sq.engine)->sessionmaker:
+def recreate_tables(engine:sq.engine)->sq.orm.session.Session:
+    Base.metadata.drop_all(engine)
+    return create_tables(engine)
+
+def create_tables(engine:sq.engine)->sq.orm.session.Session:
     Base.metadata.create_all(engine)
+    Session = sessionmaker(bind = engine)
+    return Session()
     
