@@ -3,7 +3,7 @@ import json
 import os
 from models import recreate_tables ,create_tables, Publisher, Book, Shop, Sale, Stock
 
-os.chdir(r'C:\Programs\MyPrograms\Netology\ORM\ORM')
+# os.chdir(r'C:\Programs\MyPrograms\Netology\ORM\ORM')
 def start_db()->sqlalchemy.orm.session.Session:
     basetype = 'postgresql'
     login = 'postgres'
@@ -71,11 +71,12 @@ def upload_database(session:sqlalchemy.orm.session.Session)->bool:
     return True
 
 def query_find_publisher(session:sqlalchemy.orm.session.Session, filt:str)->Publisher:
-    try:
+    if filt.isdigit():
         q = session.query(Publisher).filter(Publisher.id == int(filt))
-    except:
-        q = session.query(Publisher).filter(Publisher.name.like('%'+filt+'%'))
-        return q.all()
+        if len(q.all()) != 0:
+            return q.all()
+    q = session.query(Publisher).filter(Publisher.name.like('%'+filt+'%'))
+    return q.all()
 
 def query_print_all_publishers(session:sqlalchemy.orm.session.Session)->None:
     q = session.query(Publisher)
